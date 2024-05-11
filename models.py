@@ -11,7 +11,6 @@ class Users(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True)
     email = Column(String(100), unique=True, index=True)
-    phone_number = Column(String(20))
     gender = Column(Enum('남성', '여성'))
     school = Column(Enum('중학교', '고등학교'))
     hashed_password = Column(String(255))
@@ -185,3 +184,4 @@ class TodayConversation(Base):
     user = relationship("Users", back_populates="today_conversations")
     # 'scenarios' 테이블과의 관계 설정
     scenario = relationship("Scenario")
+

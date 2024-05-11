@@ -15,7 +15,6 @@ from pydantic import BaseModel
 class UserRead(BaseModel):
     username: str
     email: str
-    phone_number: str
     gender: str
     school: str
 

@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from starlette import status
 from pydantic import BaseModel
@@ -25,7 +25,6 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 class CreateUserRequest(BaseModel):
     username: str
     email: str
-    phone_number: str
     gender: str
     school: str
     password: str
@@ -66,19 +65,30 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate user')
 
+
 @router.post("/", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def create_user(db: Session = Depends(get_db), create_user_request: CreateUserRequest = Depends()):
+async def create_user(create_user_request: CreateUserRequest = Body(...), db: Session = Depends(get_db)):
+    # Check if user already exists
+    existing_user = db.query(Users).filter(Users.username == create_user_request.username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+
+    hashed_password = bcrypt_context.hash(create_user_request.password)
     user = Users(
+        username=create_user_request.username,
         email=create_user_request.email,
-        username=create_user_request.username,  # Ensure the username is still handled if needed
-        phone_number=create_user_request.phone_number,
         gender=create_user_request.gender,
         school=create_user_request.school,
-        hashed_password=bcrypt_context.hash(create_user_request.password),
+        hashed_password=hashed_password,
     )
     db.add(user)
-    db.commit()
-    token = create_access_token(user.username, user.id, timedelta(minutes=120))  # Use email for token
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    token = create_access_token(user.username, user.id, timedelta(minutes=120))
     return {'access_token': token, 'token_type': 'bearer'}
 
 class LoginRequestForm(BaseModel):
