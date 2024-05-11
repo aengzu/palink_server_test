@@ -26,7 +26,7 @@ def get_db():
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    api_key = "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"  # API Key는 환경 변수 등으로 관리하는 것이 보안상 안전합니다.
+    api_key = "API Key"  # API Key는 환경 변수 등으로 관리하는 것이 보안상 안전합니다.
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
