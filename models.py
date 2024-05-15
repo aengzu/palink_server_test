@@ -4,7 +4,20 @@ from database import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum, Text, Date, DateTime
 from datetime import datetime
 
+class MessageHistory(Base):
+    __tablename__ = "message_history"
+    id = Column(Integer, primary_key=True, index=True)
+    role = Column(String)
+    content = Column(Text)
+    tokens = Column(Integer)
+    chat_room_id = Column(String, nullable=False, default="default_room")
+    conversation_id = Column(Integer, ForeignKey("conversation_history.id"))
 
+class ConversationHistory(Base):
+    __tablename__ = "conversation_history"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer)
+    messages = relationship("MessageHistory", backref="conversation")
 
 class Users(Base):
     __tablename__ = 'users'

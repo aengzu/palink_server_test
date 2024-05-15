@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException, Path
+from fastapi import FastAPI
 import models
 from database import engine
-from routers import auth, todos, scenario, chat, terms, user, category, ai
+from routers import auth, scenario,  terms, user, category, prompt_engineering
 
 app = FastAPI()  # FastAPI 애플리케이션 인스턴스 생성
 
@@ -13,7 +13,5 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(scenario.router)
 app.include_router(category.router)
-app.include_router(chat.router)
 app.include_router(terms.router)
-app.include_router(ai.router)
-
+app.include_router(prompt_engineering.router)

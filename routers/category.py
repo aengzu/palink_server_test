@@ -10,14 +10,12 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 
-
 class CategoryRead(BaseModel):
     category_id: int
     category_name: str
 
     class Config:
         orm_mode = True
-
 
 def get_db():
     db = SessionLocal()
