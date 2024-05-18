@@ -16,7 +16,7 @@ router = APIRouter(
     tags=['auth']
 )
 
-SECRETE_KEY = 'd268a22e7e8597fc23a62f76bd9f59cb8c14bb784c215b4ed08f2269f247bbe0'
+SECRETE_KEY = 'd268a22e7e8597fc23a62f76bd9f59cb8c14bb784c215b4ed08f2269f247bbe0' #안되면 바꾸기
 ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
