@@ -39,6 +39,7 @@ class Category(Base):
     category_name = Column(String(255))
     # Category와 Scenario는 1:N 관계
     scenarios = relationship("Scenario", back_populates="category")  # 수정
+    guidelines = Column(Text)
 
 class Scenario(Base):
     __tablename__ = 'scenarios'
