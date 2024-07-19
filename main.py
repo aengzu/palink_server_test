@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
+
+from starlette.middleware.cors import CORSMiddleware
+
 from models import (
     Base, User, CharacterData, Conversation, Message, Tip, Feedback, Collection, Emotion, Mindset, Liking, Rejection
 )
@@ -15,6 +18,16 @@ from database import engine, get_db
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+# CORS 설정
+origins = ["*"]  # 모든 출처 허용
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Routes for User
 @app.post("/api/user/register", response_model=UserResponse)
