@@ -1,34 +1,37 @@
+
 version: '3.8'
 
 services:
-  web:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-    networks:
-      - mynetwork
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   db:
-    image: mariadb:latest
+    image: mariadb:11.4
+    container_name: palink_server_test-db
     environment:
       MYSQL_ROOT_PASSWORD: rhaxod0820
       MYSQL_DATABASE: palink
       MYSQL_USER: palink_user
       MYSQL_PASSWORD: rhaxod0820
+    volumes:
+      - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
-      - mynetwork
+      - palink_network
+
+  web:
+    image: python:3.8-slim  # 실제 웹 애플리케이션 이미지로 교체
+    container_name: palink_server_test-web
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://palink_user:rhaxod0820@db/palink
+    networks:
+      - palink_network
 
 networks:
-  mynetwork:
+  palink_network:
     driver: bridge
+
+volumes:
+  db_data:
