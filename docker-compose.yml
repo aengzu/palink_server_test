@@ -2,36 +2,13 @@
 version: '3.8'
 
 services:
-  db:
-    image: mariadb:11.4
-    container_name: palink_server_test-db
-    environment:
-      MYSQL_ROOT_PASSWORD: rhaxod0820
-      MYSQL_DATABASE: palink
-      MYSQL_USER: palink_user
-      MYSQL_PASSWORD: rhaxod0820
+  fastapi:
+    image: fastapi
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - 8000:8000
     volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - palink_network
+      - ./app:/code/app
 
-  web:
-    image: python:3.8-slim  # 실제 웹 애플리케이션 이미지로 교체
-    container_name: palink_server_test-web
-    depends_on:
-      - db
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: mysql+pymysql://palink_user:rhaxod0820@db/palink
-    networks:
-      - palink_network
 
-networks:
-  palink_network:
-    driver: bridge
 
-volumes:
-  db_data:

@@ -1,14 +1,8 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.8-slim
+FROM python:3.10
 
 # Set the working directory
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    pkg-config \
-    libmariadb-dev
+WORKDIR /code
 
 # Copy the requirements file into the container
 COPY requirements.txt .
