@@ -1,14 +1,12 @@
-version: '3.8'
+version: '3.12'
 
 services:
   db:
     image: mysql:8.0
     container_name: mysql_db
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: palink
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 0000
     ports:
       - "3306:3306"
     volumes:
