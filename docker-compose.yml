@@ -1,0 +1,32 @@
+version: '3.12'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: '0000'
+      MYSQL_DATABASE: 'palink'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: '0000'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  fastapi:
+    image: python:3.11-slim
+    container_name: fastapi_app
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "mysql://root:0000@db:3306/palink"
+
+volumes:
+  mysql-data:
