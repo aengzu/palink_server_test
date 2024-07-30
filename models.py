@@ -1,84 +1,103 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum
+from sqlalchemy.orm import relationship
+from database import Base
+import enum
 
-Base = declarative_base()
+class PersonalityTypeEnum(enum.Enum):
+    ISTJ = "ISTJ"
+    ISTP = "ISTP"
+    ISFJ = "ISFJ"
+    ISFP = "ISFP"
+    INTJ = "INTJ"
+    INTP = "INTP"
+    INFJ = "INFJ"
+    INFP = "INFP"
+    ESTJ = "ESTJ"
+    ESTP = "ESTP"
+    ESFJ = "ESFJ"
+    ESFP = "ESFP"
+    ENTJ = "ENTJ"
+    ENTP = "ENTP"
+    ENFJ = "ENFJ"
+    ENFP = "ENFP"
 
-# SQLAlchemy models
 class User(Base):
     __tablename__ = "user"
-    user_id = Column(String(255), primary_key=True, index=True)  # 길이 추가
-    name = Column(String(255))  # 길이 추가
-    password = Column(String(255))  # 길이 추가
+    userId = Column(Integer, primary_key=True, index=True)
+    accountId = Column(String(50), unique=True, index=True)
+    name = Column(String(50))
+    password = Column(String(100))
     age = Column(Integer)
-    personality_type = Column(String(255))  # 길이 추가
+    personalityType = Column(Enum(PersonalityTypeEnum))
 
-class CharacterData(Base):
-    __tablename__ = "character_data"
-    character_id = Column(Integer, primary_key=True, index=True)
-    difficulty_level = Column(Integer)
-    ai_name = Column(String(255))  # 길이 추가
+class AiCharacter(Base):
+    __tablename__ = "aicharacter"
+    characterId = Column(Integer, primary_key=True, index=True)
+    aiName = Column(String(50))
     description = Column(Text)
+    difficultyLevel = Column(Integer)
 
 class Conversation(Base):
     __tablename__ = "conversation"
-    conversation_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    conversationId = Column(Integer, primary_key=True, index=True)
     day = Column(DateTime)
-    user_id = Column(String(255), ForeignKey("user.user_id"))  # 길이 추가
-    character_id = Column(Integer, ForeignKey("character_data.character_id"))
+    userId = Column(Integer, ForeignKey("users.userId"))
+    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
 
 class Message(Base):
     __tablename__ = "message"
-    message_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    messageId = Column(Integer, primary_key=True, index=True)
+    conversationId = Column(Integer, ForeignKey("conversations.conversationId"))
     sender = Column(Boolean)
-    message_text = Column(Text)
+    messageText = Column(Text)
     timestamp = Column(DateTime)
-    conversation_id = Column(Integer, ForeignKey("conversation.conversation_id"))
 
 class Tip(Base):
     __tablename__ = "tip"
-    tip_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    tip_text = Column(Text)
-    message_id = Column(Integer, ForeignKey("message.message_id"))
-
-class Feedback(Base):
-    __tablename__ = "feedback"
-    feedback_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    feedback_text = Column(Text)
-    liking_level = Column(Integer)
-    day = Column(DateTime)
-    conversation_id = Column(Integer, ForeignKey("conversation.conversation_id"))
-
-class Collection(Base):
-    __tablename__ = "collection"
-    collection_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String(255), ForeignKey("user.user_id"))  # 길이 추가
-    character_id = Column(Integer, ForeignKey("character_data.character_id"))
-    added_date = Column(DateTime)
-
-class Emotion(Base):
-    __tablename__ = "emotion"
-    emotion_id = Column(Integer, primary_key=True, index=True)
-    emotion_type = Column(String(255))  # 길이 추가
-    vibration_pattern = Column(String(255))  # 길이 추가
-    background_color = Column(String(255))  # 길이 추가
-
-class Mindset(Base):
-    __tablename__ = "mindset"
-    mindset_id = Column(Integer, primary_key=True, index=True)
-    mindset_text = Column(Text)
+    tipId = Column(Integer, primary_key=True, index=True)
+    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    tipText = Column(Text)
 
 class Liking(Base):
     __tablename__ = "liking"
-    liking_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String(255), ForeignKey("user.user_id"))  # 길이 추가
-    character_id = Column(Integer, ForeignKey("character_data.character_id"))
-    liking_level = Column(Integer)
-    message_id = Column(Integer, ForeignKey("message.message_id"))
+    likingId = Column(Integer, primary_key=True, index=True)
+    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    likingLevel = Column(Integer)
+    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
+    userId = Column(Integer, ForeignKey("users.userId"))
+
+class Mindset(Base):
+    __tablename__ = "mindset"
+    mindsetId = Column(Integer, primary_key=True, index=True)
+    mindsetText = Column(Text)
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    feedbackId = Column(Integer, primary_key=True, index=True)
+    conversationId = Column(Integer, ForeignKey("conversations.conversationId"))
+    feedbackText = Column(Text)
+    finalLikingLevel = Column(Integer)
+    totalRejectionScore = Column(Integer)
 
 class Rejection(Base):
     __tablename__ = "rejection"
-    rejection_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String(255), ForeignKey("user.user_id"))  # 길이 추가
-    character_id = Column(Integer, ForeignKey("character_data.character_id"))
-    rejection_level = Column(Integer)
-    message_id = Column(Integer, ForeignKey("message.message_id"))
+    rejectionId = Column(Integer, primary_key=True, index=True)
+    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    rejectionLevel = Column(Integer)
+    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
+    userId = Column(Integer, ForeignKey("users.userId"))
+    rejectionText = Column(Text)
+
+class UserCollection(Base):
+    __tablename__ = "usercollection"
+    userId = Column(Integer, ForeignKey("users.userId"), primary_key=True)
+    characterId = Column(Integer, ForeignKey("aicharacters.characterId"), primary_key=True)
+    addedDate = Column(DateTime)
+
+class Emotion(Base):
+    __tablename__ = "emotion"
+    emotionId = Column(Integer, primary_key=True, index=True)
+    emotionType = Column(String(50))
+    vibrationPattern = Column(Integer)
+    backgroundColor = Column(String(20))
+    messageId = Column(Integer, ForeignKey("messages.messageId"))

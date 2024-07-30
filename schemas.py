@@ -1,135 +1,225 @@
 from pydantic import BaseModel
-from datetime import datetime
+from typing import Optional, List
+import datetime
 
-# Pydantic models
-class UserCreate(BaseModel):
-    user_id: str
-    name: str
-    password: str
-    age: int
-    personality_type: str
-
-class UserResponse(BaseModel):
-    user_id: str
+class UserBase(BaseModel):
+    accountId: str
     name: str
     age: int
-    personality_type: str
+    personalityType: str
 
-class LoginRequest(BaseModel):
-    user_id: str
+class UserCreate(UserBase):
     password: str
 
-class LoginResponse(BaseModel):
-    user_id: str
-    name: str
-    age: int
-    personality_type: str
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    password: Optional[str] = None
+    age: Optional[int] = None
+    personalityType: Optional[str] = None
 
-class ConversationCreate(BaseModel):
-    day: datetime
-    user_id: str
-    character_id: int
+class UserLogin(BaseModel):
+    accountId: str
+    password: str
 
-class ConversationResponse(BaseModel):
-    conversation_id: int
-    day: datetime
-    user_id: str
-    character_id: int
+class User(UserBase):
+    userId: int
 
-class MessageCreate(BaseModel):
-    sender: bool
-    message_text: str
-    timestamp: datetime
-    conversation_id: int
+    class Config:
+        from_attributes = True
 
-class MessageResponse(BaseModel):
-    message_id: int
-    sender: bool
-    message_text: str
-    timestamp: datetime
-    conversation_id: int
-
-class TipCreate(BaseModel):
-    tip_text: str
-    message_id: int
-
-class TipResponse(BaseModel):
-    tip_id: int
-    tip_text: str
-    message_id: int
-
-class CharacterResponse(BaseModel):
-    character_id: int
-    difficulty_level: int
-    ai_name: str
+class AiCharacterBase(BaseModel):
+    aiName: str
     description: str
+    difficultyLevel: int
 
-class FeedbackCreate(BaseModel):
-    feedback_text: str
-    liking_level: int
-    day: datetime
-    conversation_id: int
+class AiCharacterCreate(AiCharacterBase):
+    pass
 
-class FeedbackResponse(BaseModel):
-    feedback_id: int
-    feedback_text: str
-    liking_level: int
-    day: datetime
-    conversation_id: int
+class AiCharacter(AiCharacterBase):
+    characterId: int
 
-class CollectionCreate(BaseModel):
-    user_id: str
-    character_id: int
-    added_date: datetime
+    class Config:
+        from_attributes = True
 
-class CollectionResponse(BaseModel):
-    collection_id: int
-    user_id: str
-    character_id: int
-    added_date: datetime
+class AiCharacters(BaseModel):
+    characters: List[AiCharacter]
 
-class EmotionResponse(BaseModel):
-    emotion_id: int
-    emotion_type: str
-    vibration_pattern: str
-    background_color: str
+    class Config:
+        from_attributes = True
 
-class EmotionCreate(BaseModel):
-    emotion_id: int
-    emotion_type: str
-    vibration_pattern: str
-    background_color: str
+class ConversationBase(BaseModel):
+    day: datetime.datetime
+    userId: int
+    characterId: int
 
-class MindsetResponse(BaseModel):
-    mindset_id: int
-    mindset_text: str
+class ConversationCreate(ConversationBase):
+    pass
 
-class MindsetCreate(BaseModel):
-    mindset_id: int
-    mindset_text: str
+class Conversation(ConversationBase):
+    conversationId: int
 
-class LikingCreate(BaseModel):
-    user_id: str
-    character_id: int
-    liking_level: int
-    message_id: int
+    class Config:
+        from_attributes = True
 
-class LikingResponse(BaseModel):
-    liking_id: int
-    user_id: str
-    character_id: int
-    liking_level: int
-    message_id: int
+class Conversations(BaseModel):
+    conversations: List[Conversation]
 
-class RejectionCreate(BaseModel):
-    user_id: str
-    character_id: int
-    rejection_level: int
-    message_id: int
+    class Config:
+        from_attributes = True
 
-class RejectionResponse(BaseModel):
-    rejection_id: int
-    user_id: str
-    character_id: int
-    rejection_level: int
-    message_id: int
+class MessageBase(BaseModel):
+    sender: bool
+    messageText: str
+    timestamp: datetime.datetime
+
+class MessageCreate(MessageBase):
+    pass
+
+class Message(MessageBase):
+    messageId: int
+    conversationId: int
+
+    class Config:
+        from_attributes = True
+
+class Messages(BaseModel):
+    messages: List[Message]
+
+    class Config:
+        from_attributes = True
+
+class TipBase(BaseModel):
+    messageId: int
+    tipText: Optional[str] = None
+
+class TipCreate(TipBase):
+    pass
+
+class Tip(TipBase):
+    tipId: int
+
+    class Config:
+        from_attributes = True
+
+class Tips(BaseModel):
+    tips: List[Tip]
+
+    class Config:
+        from_attributes = True
+
+class LikingBase(BaseModel):
+    messageId: int
+    likingLevel: Optional[int] = None
+    characterId: int
+    userId: int
+
+class LikingCreate(LikingBase):
+    pass
+
+class Liking(LikingBase):
+    likingId: int
+
+    class Config:
+        from_attributes = True
+
+class Likings(BaseModel):
+    likings: List[Liking]
+
+    class Config:
+        from_attributes = True
+
+class MindsetBase(BaseModel):
+    mindsetText: str
+
+class MindsetCreate(MindsetBase):
+    pass
+
+class Mindset(MindsetBase):
+    mindsetId: int
+
+    class Config:
+        from_attributes = True
+
+class FeedbackBase(BaseModel):
+    conversationId: int
+    feedbackText: Optional[str] = None
+    finalLikingLevel: Optional[int] = None
+    totalRejectionScore: Optional[int] = None
+
+class FeedbackCreate(FeedbackBase):
+    pass
+
+class Feedback(FeedbackBase):
+    feedbackId: int
+
+    class Config:
+        from_attributes = True
+
+class Feedbacks(BaseModel):
+    feedbacks: List[Feedback]
+
+    class Config:
+        from_attributes = True
+
+class UserCollectionBase(BaseModel):
+    characterId: int
+    addedDate: datetime.datetime
+
+class UserCollectionCreate(UserCollectionBase):
+    pass
+
+class UserCollection(UserCollectionBase):
+    userId: int
+
+    class Config:
+        from_attributes = True
+
+class UserCollections(BaseModel):
+    userId: int
+    characters: List[UserCollection]
+
+    class Config:
+        from_attributes = True
+
+class EmotionBase(BaseModel):
+    emotionType: str
+    vibrationPattern: int
+    backgroundColor: str
+    messageId: int
+
+class EmotionCreate(EmotionBase):
+    pass
+
+class Emotion(EmotionBase):
+    emotionId: int
+
+    class Config:
+        from_attributes = True
+
+class Emotions(BaseModel):
+    emotions: List[Emotion]
+
+    class Config:
+        from_attributes = True
+
+class RejectionBase(BaseModel):
+    messageId: int
+    rejectionLevel: Optional[int] = None
+    characterId: int
+    userId: int
+    rejectionText: Optional[str] = None
+
+class RejectionCreate(RejectionBase):
+    pass
+
+class Rejection(RejectionBase):
+    rejectionId: int
+
+    class Config:
+        from_attributes = True
+
+class Rejections(BaseModel):
+    rejections: List[Rejection]
+
+    class Config:
+        from_attributes = True
