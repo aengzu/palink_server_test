@@ -41,13 +41,13 @@ class Conversation(Base):
     __tablename__ = "conversation"
     conversationId = Column(Integer, primary_key=True, index=True)
     day = Column(DateTime)
-    userId = Column(Integer, ForeignKey("users.userId"))
-    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
+    userId = Column(Integer, ForeignKey("user.userId"))
+    characterId = Column(Integer, ForeignKey("aicharacter.characterId"))
 
 class Message(Base):
     __tablename__ = "message"
     messageId = Column(Integer, primary_key=True, index=True)
-    conversationId = Column(Integer, ForeignKey("conversations.conversationId"))
+    conversationId = Column(Integer, ForeignKey("conversation.conversationId"))
     sender = Column(Boolean)
     messageText = Column(Text)
     timestamp = Column(DateTime)
@@ -55,16 +55,16 @@ class Message(Base):
 class Tip(Base):
     __tablename__ = "tip"
     tipId = Column(Integer, primary_key=True, index=True)
-    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    messageId = Column(Integer, ForeignKey("message.messageId"))
     tipText = Column(Text)
 
 class Liking(Base):
     __tablename__ = "liking"
     likingId = Column(Integer, primary_key=True, index=True)
-    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    messageId = Column(Integer, ForeignKey("message.messageId"))
     likingLevel = Column(Integer)
-    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
-    userId = Column(Integer, ForeignKey("users.userId"))
+    characterId = Column(Integer, ForeignKey("aicharacter.characterId"))
+    userId = Column(Integer, ForeignKey("user.userId"))
 
 class Mindset(Base):
     __tablename__ = "mindset"
@@ -74,7 +74,7 @@ class Mindset(Base):
 class Feedback(Base):
     __tablename__ = "feedback"
     feedbackId = Column(Integer, primary_key=True, index=True)
-    conversationId = Column(Integer, ForeignKey("conversations.conversationId"))
+    conversationId = Column(Integer, ForeignKey("conversation.conversationId"))
     feedbackText = Column(Text)
     finalLikingLevel = Column(Integer)
     totalRejectionScore = Column(Integer)
@@ -82,16 +82,16 @@ class Feedback(Base):
 class Rejection(Base):
     __tablename__ = "rejection"
     rejectionId = Column(Integer, primary_key=True, index=True)
-    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    messageId = Column(Integer, ForeignKey("message.messageId"))
     rejectionLevel = Column(Integer)
-    characterId = Column(Integer, ForeignKey("aicharacters.characterId"))
-    userId = Column(Integer, ForeignKey("users.userId"))
+    characterId = Column(Integer, ForeignKey("aicharacter.characterId"))
+    userId = Column(Integer, ForeignKey("user.userId"))
     rejectionText = Column(Text)
 
 class UserCollection(Base):
     __tablename__ = "usercollection"
-    userId = Column(Integer, ForeignKey("users.userId"), primary_key=True)
-    characterId = Column(Integer, ForeignKey("aicharacters.characterId"), primary_key=True)
+    userId = Column(Integer, ForeignKey("user.userId"), primary_key=True)
+    characterId = Column(Integer, ForeignKey("aicharacter.characterId"), primary_key=True)
     addedDate = Column(DateTime)
 
 class Emotion(Base):
@@ -100,4 +100,4 @@ class Emotion(Base):
     emotionType = Column(String(50))
     vibrationPattern = Column(Integer)
     backgroundColor = Column(String(20))
-    messageId = Column(Integer, ForeignKey("messages.messageId"))
+    messageId = Column(Integer, ForeignKey("message.messageId"))
