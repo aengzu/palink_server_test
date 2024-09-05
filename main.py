@@ -89,8 +89,7 @@ def create_message(conversation_id: int, message: schemas.MessageCreate, db: Ses
     db.refresh(db_message)
 
     # If the message is an AI response (sender=False)
-    # 이전 대화가 없다면(대화 첫 시작이라면) ai_response 저장 안해도 될 듯? 예외처리하기
-    if not message.sender:
+    if not message.sender and message.ai_response:
         # Retrieve the user's last message
         previous_message = db.query(models.Message).filter(
             models.Message.conversationId == conversation_id,
@@ -100,17 +99,27 @@ def create_message(conversation_id: int, message: schemas.MessageCreate, db: Ses
         if not previous_message:
             raise HTTPException(status_code=404, detail="Previous user message not found")
 
+        # 해당 대화(conversation_id)에 해당하는 모든 AIResponse를 가져오기
+        all_ai_responses = db.query(models.AIResponse).filter(
+             models.AIResponse.conversation_id == conversation_id
+        ).all()
+
+        # 모든 rejection_score 리스트의 값을 합산
+        total_rejection_score = sum(
+            sum(ai_response.rejection_score) for ai_response in all_ai_responses
+        )
+
         ai_response = models.AIResponse(
             aiMessage=db_message.messageId,
-            text=message.ai_response.text,
+            text=message.ai_response.text, #현재 ai가 보내는 답장 메시지
             feeling=message.ai_response.feeling,
             affinity_score=message.ai_response.affinity_score,
             achieved_quest=message.ai_response.achieved_quest,
             rejection_score=message.ai_response.rejection_score,
-            userMessage=previous_message.messageText,
+            userMessage=previous_message.messageText, #이전에 유저가 보낸 말
             conversation_id=conversation_id,
-            rejection_content=message.ai_response.rejection_content,
-            final_rejection_score=message.ai_response.final_rejection_score
+            rejection_content=message.ai_response.rejection_content, #거절점수표에 있는 내용 (이유있는 거절 등)
+            final_rejection_score=total_rejection_score + sum(message.ai_response.rejection_score) # 누적된 rejection_score
         )
         db.add(ai_response)
         db.commit()

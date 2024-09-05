@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum, JSON
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
@@ -44,7 +44,8 @@ class Conversation(Base):
     userId = Column(Integer, ForeignKey("user.userId"))
     characterId = Column(Integer, ForeignKey("aicharacter.characterId"))
 
-    messages = relationship("Message", back_populates="conversation")
+    # Message와의 1:N 관계 (하나의 대화창에 여러 개의 메시지가 포함)
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
 
 class Message(Base):
     __tablename__ = "message"
@@ -54,23 +55,29 @@ class Message(Base):
     messageText = Column(Text, nullable=False)
     timestamp = Column(DateTime, nullable=False)
 
+    # Conversation과의 N:1 관계 (하나의 메시지는 하나의 대화에 속함)
     conversation = relationship("Conversation", back_populates="messages")
-    ai_response = relationship("AIResponse", back_populates="message", foreign_keys="[AIResponse.aiMessage]")  # 외래 키 명시
+
+    # AIResponse와의 1:1 관계, foreign_keys 명시
+    ai_response = relationship("AIResponse", back_populates="message", uselist=False,
+                               foreign_keys="[AIResponse.aiMessage]")
 
 class AIResponse(Base):
-    __tablename__ = "AIRresponses"
+    __tablename__ = "AIResponses"
+
     aiMessage = Column(Integer, ForeignKey("message.messageId"), primary_key=True, index=True)
     text = Column(Text, nullable=False)
     feeling = Column(Text)
     affinity_score = Column(Integer)
-    achieved_quest = Column(Text)
-    rejection_score = Column(Integer)
+    achieved_quest = Column(JSON)  # 리스트 형태로 저장할 수 있도록 JSON 타입 사용
+    rejection_score = Column(JSON)  # JSON 형태로 리스트 값 저장 가능
+    rejection_content = Column(JSON)
     userMessage = Column(Text)
-    conversation_id = Column(Integer, ForeignKey("message.conversationId"))
-    rejection_content = Column(Text)
     final_rejection_score = Column(Integer)
+    conversation_id = Column(Integer, ForeignKey("message.conversationId"))
 
-    message = relationship("Message", back_populates="ai_response", foreign_keys=[aiMessage])  # 외래 키 명시
+    # Message와의 1:1 관계, 외래 키 명시
+    message = relationship("Message", back_populates="ai_response", foreign_keys=[aiMessage])
 
 class Tip(Base):
     __tablename__ = "tip"
