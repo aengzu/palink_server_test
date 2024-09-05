@@ -81,10 +81,41 @@ def read_user_conversations(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/conversations/{conversation_id}/messages", response_model=schemas.Message)
 def create_message(conversation_id: int, message: schemas.MessageCreate, db: Session = Depends(get_db)):
-    db_message = models.Message(conversationId=conversation_id, **message.dict())
+    # Create the message in the database
+    db_message = models.Message(conversationId=conversation_id, sender=message.sender, messageText=message.messageText,
+                                timestamp=message.timestamp)
     db.add(db_message)
     db.commit()
     db.refresh(db_message)
+
+    # If the message is an AI response (sender=False)
+    # 이전 대화가 없다면(대화 첫 시작이라면) ai_response 저장 안해도 될 듯? 예외처리하기
+    if not message.sender:
+        # Retrieve the user's last message
+        previous_message = db.query(models.Message).filter(
+            models.Message.conversationId == conversation_id,
+            models.Message.messageId == db_message.messageId - 1
+        ).first()
+
+        if not previous_message:
+            raise HTTPException(status_code=404, detail="Previous user message not found")
+
+        ai_response = models.AIResponse(
+            aiMessage=db_message.messageId,
+            text=message.ai_response.text,
+            feeling=message.ai_response.feeling,
+            affinity_score=message.ai_response.affinity_score,
+            achieved_quest=message.ai_response.achieved_quest,
+            rejection_score=message.ai_response.rejection_score,
+            userMessage=previous_message.messageText,
+            conversation_id=conversation_id,
+            rejection_content=message.ai_response.rejection_content,
+            final_rejection_score=message.ai_response.final_rejection_score
+        )
+        db.add(ai_response)
+        db.commit()
+        db.refresh(ai_response)
+
     return db_message
 
 @app.get("/conversations/{conversation_id}/messages", response_model=schemas.Messages)
@@ -100,6 +131,31 @@ def read_message(conversation_id: int, message_id: int, db: Session = Depends(ge
     if db_message is None:
         raise HTTPException(status_code=404, detail="Message not found")
     return db_message
+
+@app.get("/conversations/{conversation_id}/airesponses")
+def get_ai_responses_by_conversation(conversation_id: int, db: Session = Depends(get_db)):
+    # 특정 conversationId에 해당하는 AIresponses 조회
+    ai_responses = db.query(models.AIResponse).filter(models.AIResponse.conversation_id == conversation_id).all()
+
+    if not ai_responses:
+        raise HTTPException(status_code=404, detail=f"No AI responses found for conversation_id {conversation_id}")
+
+    return ai_responses
+
+
+@app.get("/conversations/{conversation_id}/messages/{message_id}/airesponses")
+def get_ai_responses(conversation_id: int, message_id: int, db: Session = Depends(get_db)):
+    # 특정 conversation_id와 message_id에 해당하는 AIresponses 조회
+    ai_responses = db.query(models.AIResponse).filter(
+        models.AIResponse.conversation_id == conversation_id,
+        models.AIResponse.aiMessage == message_id
+    ).all()
+
+    if not ai_responses:
+        raise HTTPException(status_code=404,
+                            detail=f"No AI responses found for conversation_id {conversation_id} and message_id {message_id}")
+
+    return ai_responses
 
 @app.post("/tips", response_model=schemas.Tip)
 def create_tip(tip: schemas.TipCreate, db: Session = Depends(get_db)):

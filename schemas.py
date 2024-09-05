@@ -72,8 +72,6 @@ class MessageBase(BaseModel):
     messageText: str
     timestamp: datetime.datetime
 
-class MessageCreate(MessageBase):
-    pass
 
 class Message(MessageBase):
     messageId: int
@@ -87,6 +85,36 @@ class Messages(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AIResponseBase(BaseModel):
+    text: str
+    feeling: Optional[str] = None
+    affinity_score: int
+    achieved_quest: Optional[str] = None
+    rejection_score: int
+    rejection_content: str
+    final_rejection_score: int
+
+class AIResponseCreate(BaseModel):
+    text: str
+    feeling: str
+    affinity_score: int
+    achieved_quest: bool
+    rejection_score: int
+    rejection_content: Optional[str]
+    final_rejection_score: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+class AIResponse(AIResponseBase):
+    aiMessage: int
+
+    class Config:
+        orm_mode = True
+
+class MessageCreate(MessageBase):
+    ai_response: Optional[AIResponseCreate] = None  # AI 응답은 선택 사항
 
 class TipBase(BaseModel):
     messageId: int
@@ -223,3 +251,4 @@ class Rejections(BaseModel):
 
     class Config:
         from_attributes = True
+
