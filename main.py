@@ -109,17 +109,23 @@ def create_message(conversation_id: int, message: schemas.MessageCreate, db: Ses
             sum(ai_response.rejection_score) for ai_response in all_ai_responses
         )
 
+        # 모든 affinity_score의 값을 합산
+        total_affinity_score = sum(
+            ai_response.affinity_score for ai_response in all_ai_responses
+            if ai_response.affinity_score is not None
+        )
+
         ai_response = models.AIResponse(
             aiMessage=db_message.messageId,
-            text=message.ai_response.text, #현재 ai가 보내는 답장 메시지
+            text=db_message.messageText, #현재 ai가 보내는 답장 메시지
             feeling=message.ai_response.feeling,
             affinity_score=message.ai_response.affinity_score,
-            achieved_quest=message.ai_response.achieved_quest,
             rejection_score=message.ai_response.rejection_score,
             userMessage=previous_message.messageText, #이전에 유저가 보낸 말
             conversation_id=conversation_id,
             rejection_content=message.ai_response.rejection_content, #거절점수표에 있는 내용 (이유있는 거절 등)
-            final_rejection_score=total_rejection_score + sum(message.ai_response.rejection_score) # 누적된 rejection_score
+            final_rejection_score=total_rejection_score + sum(message.ai_response.rejection_score), # 누적된 rejection_score
+            final_affinity_score = total_affinity_score + message.ai_response.affinity_score  # 누적된 affinity_score
         )
         db.add(ai_response)
         db.commit()

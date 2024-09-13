@@ -6,7 +6,6 @@ class UserBase(BaseModel):
     accountId: str
     name: str
     age: int
-    personalityType: str
 
 class UserCreate(UserBase):
     password: str
@@ -15,7 +14,6 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     password: Optional[str] = None
     age: Optional[int] = None
-    personalityType: Optional[str] = None
 
 class UserLogin(BaseModel):
     accountId: str
@@ -91,10 +89,10 @@ class AIResponseBase(BaseModel):
     text: str
     feeling: Optional[str] = None  # 필수 값이 아니므로 Optional로 설정
     affinity_score: int
-    achieved_quest: Optional[List[str]] = None  # Optional List of strings
     rejection_score: List[int]  # List of integer values
     rejection_content: List[str]  # List of string values
     final_rejection_score: int
+    final_affinity_score: int
 
 # AIResponseCreate: 데이터를 생성할 때 사용하는 스키마
 class AIResponseCreate(AIResponseBase):
@@ -102,6 +100,7 @@ class AIResponseCreate(AIResponseBase):
     rejection_score: List[int]  # List of integer values
     rejection_content: List[str]  # List of string values
     final_rejection_score: Optional[int]  # Optional로 설정
+    final_affinity_score: Optional[int]  # Optional로 설정
 
     class Config:
         orm_mode = True  # SQLAlchemy 모델과의 호환성 설정

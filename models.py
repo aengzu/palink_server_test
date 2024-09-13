@@ -3,24 +3,6 @@ from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
-class PersonalityTypeEnum(enum.Enum):
-    ISTJ = "ISTJ"
-    ISTP = "ISTP"
-    ISFJ = "ISFJ"
-    ISFP = "ISFP"
-    INTJ = "INTJ"
-    INTP = "INTP"
-    INFJ = "INFJ"
-    INFP = "INFP"
-    ESTJ = "ESTJ"
-    ESTP = "ESTP"
-    ESFJ = "ESFJ"
-    ESFP = "ESFP"
-    ENTJ = "ENTJ"
-    ENTP = "ENTP"
-    ENFJ = "ENFJ"
-    ENFP = "ENFP"
-
 class User(Base):
     __tablename__ = "user"
     userId = Column(Integer, primary_key=True, index=True)
@@ -28,7 +10,6 @@ class User(Base):
     name = Column(String(50))
     password = Column(String(100))
     age = Column(Integer)
-    personalityType = Column(Enum(PersonalityTypeEnum))
 
 class AiCharacter(Base):
     __tablename__ = "aicharacter"
@@ -69,11 +50,11 @@ class AIResponse(Base):
     text = Column(Text, nullable=False)
     feeling = Column(Text)
     affinity_score = Column(Integer)
-    achieved_quest = Column(JSON)  # 리스트 형태로 저장할 수 있도록 JSON 타입 사용
     rejection_score = Column(JSON)  # JSON 형태로 리스트 값 저장 가능
     rejection_content = Column(JSON)
     userMessage = Column(Text)
     final_rejection_score = Column(Integer)
+    final_affinity_score = Column(Integer)
     conversation_id = Column(Integer, ForeignKey("message.conversationId"))
 
     # Message와의 1:1 관계, 외래 키 명시
