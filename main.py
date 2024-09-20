@@ -5,6 +5,8 @@ import models, schemas
 from database import engine, get_db
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from typing import List
+
 
 app = FastAPI()
 
@@ -161,6 +163,31 @@ def get_ai_responses_by_conversation(conversation_id: int, db: Session = Depends
 @app.get("/conversations/{conversation_id}/messages/{message_id}/airesponses")
 def get_ai_responses(conversation_id: int, message_id: int, db: Session = Depends(get_db)):
     # 특정 conversation_id와 message_id에 해당하는 AIresponses 조회
+    ai_responses = db.query(models.AIResponse).filter(
+        models.AIResponse.conversation_id == conversation_id,
+        models.AIResponse.aiMessage == message_id
+    ).all()
+
+    if not ai_responses:
+        raise HTTPException(status_code=404,
+                            detail=f"No AI responses found for conversation_id {conversation_id} and message_id {message_id}")
+
+    return ai_responses
+
+@app.get("/conversations/{conversation_id}/airesponses", response_model=List[schemas.AIResponse])
+def get_ai_responses_by_conversation(conversation_id: int, db: Session = Depends(get_db)):
+    # Query AI responses by conversation_id
+    ai_responses = db.query(models.AIResponse).filter(models.AIResponse.conversation_id == conversation_id).all()
+
+    if not ai_responses:
+        raise HTTPException(status_code=404, detail=f"No AI responses found for conversation_id {conversation_id}")
+
+    return ai_responses
+
+
+@app.get("/conversations/{conversation_id}/messages/{message_id}/airesponses", response_model=List[schemas.AIResponse])
+def get_ai_responses_by_message(conversation_id: int, message_id: int, db: Session = Depends(get_db)):
+    # Query AI responses by both conversation_id and message_id
     ai_responses = db.query(models.AIResponse).filter(
         models.AIResponse.conversation_id == conversation_id,
         models.AIResponse.aiMessage == message_id
